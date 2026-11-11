@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>삼각형의 무게중심 탐구</title>
+<style>
+:root{--blue:#2457d6;--navy:#172554;--ink:#172033;--muted:#64748b;--line:#dce4ef;--bg:#f4f7fc;--teal:#0f766e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif}
+header{height:70px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.brand{font-size:21px;font-weight:900;color:var(--navy)}.brand span{color:var(--blue)}
+button{border:0;border-radius:12px;padding:12px 17px;font-size:16px;font-weight:750;cursor:pointer;background:#e9eef8;color:var(--navy)}
+button.primary{background:var(--blue);color:white}button:disabled{opacity:.4;cursor:not-allowed}
+main{max-width:1400px;margin:auto;padding:22px 28px}.progress{display:flex;gap:8px;margin-bottom:22px}.bar{height:7px;flex:1;border-radius:9px;background:#dce4ef}.bar.on{background:var(--blue)}
+.screen{display:none}.screen.on{display:block}.eyebrow{font-weight:800;color:var(--blue);letter-spacing:.06em;font-size:14px}
+h1{font-size:clamp(30px,3vw,44px);color:var(--navy);margin:8px 0 10px}.sub{font-size:19px;color:var(--muted);margin:0 0 22px}
+.layout{display:grid;grid-template-columns:1.55fr 1fr;gap:18px}.panel{background:white;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 7px 22px #1725540a}
+h2{color:var(--navy);font-size:21px;margin:0 0 14px}
+svg{display:block;width:100%;height:auto;background:#fbfdff;border-radius:14px;touch-action:none}
+.control{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.note{background:#eff6ff;border-left:5px solid var(--blue);padding:15px;border-radius:10px;line-height:1.65;margin:14px 0}
+.stat{background:#f0f5ff;padding:14px;border-radius:13px;margin:10px 0}.stat strong{display:block;font-size:26px;color:var(--blue)}
+.small{font-size:14px;color:var(--muted);line-height:1.55}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:25px 0}.feature{background:#f0f5ff;border-radius:15px;padding:18px;line-height:1.5}.feature b{display:block;color:var(--navy);margin-bottom:6px}
+footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px}.nav{display:flex;gap:9px}
+.choice{display:block;width:100%;text-align:left;margin:9px 0;background:#f6f8fc;border:2px solid var(--line);padding:14px 16px}.choice.sel{border-color:var(--blue);background:#eff6ff}.choice.good{border-color:#16a34a;background:#f0fdf4}.choice.bad{border-color:#dc2626;background:#fef2f2}
+.feedback{padding:14px;border-radius:12px;background:#f1f5f9;line-height:1.6;min-height:56px;margin:12px 0}.big{font-size:60px;font-weight:950;color:var(--blue)}
+@media(max-width:850px){main{padding:15px}.layout{grid-template-columns:1fr}.features{grid-template-columns:1fr}header{padding:0 15px}}
+</style>
+</head>
+<body>
+<header><div class="brand">수학 탐구실 <span>· 삼각형의 무게중심</span></div><button onclick="fullScreen()">⛶ 전체 화면</button></header>
+<main>
+<div class="progress" id="progress"><div class="bar on"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+
+<section class="screen on" id="s0">
+<div class="eyebrow">중학교 2학년 수학 · 도형의 성질</div><h1>삼각형의 무게중심을<br>직접 찾아보자!</h1><p class="sub">삼각형을 움직이고 중선을 그으며 무게중심의 비밀을 발견해 봅시다.</p>
+<div class="panel"><div class="features"><div class="feature"><b>01 · 움직여 보기</b>꼭짓점을 끌어 삼각형의 모양을 바꿔요.</div><div class="feature"><b>02 · 중선 그리기</b>각 변의 중점과 꼭짓점을 연결해요.</div><div class="feature"><b>03 · 비율 확인</b>무게중심이 중선을 나누는 비율을 알아봐요.</div></div>
+<div class="note"><b>오늘의 학습 목표</b><br>① 삼각형의 무게중심의 뜻을 설명할 수 있다.<br>② 세 중선의 교점이 무게중심임을 이해하고 2:1의 비율을 설명할 수 있다.</div>
+<button class="primary" onclick="go(1)">탐구 시작하기 →</button></div></section>
+
+<section class="screen" id="s1"><div class="eyebrow">STEP 1 · 삼각형 관찰</div><h1>삼각형의 모양을 바꿔 보자</h1><p class="sub">파란 꼭짓점 A, B, C를 마우스로 끌어 움직여 보세요.</p>
+<div class="layout"><div class="panel"><h2>꼭짓점을 드래그하세요</h2><svg id="svg1" viewBox="0 0 720 440"><polygon id="poly1" fill="#dbeafe" fill-opacity=".55" stroke="#2457d6" stroke-width="4"/><g id="v1"></g></svg><div class="control"><button onclick="reset()">삼각형 초기화</button><button class="primary" onclick="go(2)">중선 탐구하기 →</button></div></div>
+<div class="panel"><h2>관찰해 봅시다</h2><div class="stat">삼각형의 꼭짓점<strong>A · B · C</strong></div><div class="note">삼각형의 모양이나 크기가 달라져도 무게중심을 찾는 방법은 같을까요?</div><p class="small">꼭짓점을 움직이면 다음 단계의 중점과 중선도 함께 바뀝니다.</p></div></div></section>
+
+<section class="screen" id="s2"><div class="eyebrow">STEP 2 · 중선 그리기</div><h1>세 중선을 그려 보자</h1><p class="sub">각 변의 중점을 확인하고 꼭짓점과 반대편 변의 중점을 연결해 봅시다.</p>
+<div class="layout"><div class="panel"><h2>중선과 중점</h2><svg id="svg2" viewBox="0 0 720 440"><polygon id="poly2" fill="#dbeafe" fill-opacity=".4" stroke="#2457d6" stroke-width="4"/><g id="lines2"></g><g id="points2"></g><g id="verts2"></g></svg><div class="control"><button onclick="toggle(0)">중선 AD</button><button onclick="toggle(1)">중선 BE</button><button onclick="toggle(2)">중선 CF</button><button class="primary" onclick="allLines()">세 중선 모두 보기</button></div></div>
+<div class="panel"><h2>중선의 뜻</h2><div class="note"><b>중선</b>은 삼각형의 한 꼭짓점과 그 대변의 중점을 이은 선분입니다.</div><div class="stat">D : 변 BC의 중점</div><div class="stat">E : 변 CA의 중점</div><div class="stat">F : 변 AB의 중점</div><p class="small">삼각형 하나에는 중선이 모두 몇 개일까요?</p><button class="primary" onclick="go(3)">교점 확인하기 →</button></div></div></section>
+
+<section class="screen" id="s3"><div class="eyebrow">STEP 3 · 무게중심 발견</div><h1>세 중선은 한 점에서 만날까?</h1><p class="sub">세 중선을 모두 나타내고 교점을 확인해 봅시다.</p>
+<div class="layout"><div class="panel"><h2>세 중선의 교점 G</h2><svg id="svg3" viewBox="0 0 720 440"><polygon id="poly3" fill="#dbeafe" fill-opacity=".4" stroke="#2457d6" stroke-width="4"/><g id="lines3"></g><g id="points3"></g><g id="cent3"></g><g id="verts3"></g></svg><div class="control"><button onclick="reset()">처음 모양으로</button><button class="primary" onclick="go(4)">2:1 비율 실험하기 →</button></div></div>
+<div class="panel"><h2>핵심 개념</h2><div class="big">G</div><div class="note"><b>삼각형의 무게중심</b><br>삼각형의 세 중선이 한 점에서 만날 때, 그 교점을 삼각형의 무게중심이라고 합니다.</div><p>세 중선은 항상 한 점에서 만나며, 그 점이 무게중심 G입니다.</p></div></div></section>
+
+<section class="screen" id="s4"><div class="eyebrow">STEP 4 · 2:1 비율 실험</div><h1>무게중심은 중선을 어떻게 나눌까?</h1><p class="sub">꼭짓점에서 무게중심까지와 무게중심에서 대변의 중점까지를 비교해 봅시다.</p>
+<div class="layout"><div class="panel"><h2>중선 AD 위의 길이 비교</h2><svg id="svg4" viewBox="0 0 720 440"><polygon id="poly4" fill="#dbeafe" fill-opacity=".4" stroke="#2457d6" stroke-width="4"/><g id="lines4"></g><g id="points4"></g><g id="cent4"></g><g id="verts4"></g></svg></div>
+<div class="panel"><h2>비율 확인</h2><div class="stat">AG : GD<strong>2 : 1</strong></div><div class="note"><b style="font-size:27px;color:#2457d6">AG : GD = 2 : 1</b><br>무게중심은 각 중선을 꼭짓점 쪽과 대변의 중점 쪽으로 2:1로 나눕니다.</div><p><b>예시 문제</b><br>AG의 길이가 8cm라면 GD의 길이는 얼마일까요?</p><button onclick="document.getElementById('example').hidden=false">정답과 풀이 보기</button><div id="example" class="feedback" hidden>AG : GD = 2 : 1이므로 GD는 AG의 절반입니다.<br><b>8 ÷ 2 = 4, 따라서 GD = 4cm</b></div><div class="control"><button class="primary" onclick="startQuiz()">개념 확인 퀴즈 →</button></div></div></div></section>
+
+<section class="screen" id="s5"><div class="eyebrow">STEP 5 · 개념 확인</div><h1>무게중심 퀴즈</h1><p class="sub">다섯 문제를 풀고 오늘의 탐구를 마무리해 봅시다.</p>
+<div class="panel" id="quiz"><div style="display:flex;justify-content:space-between;color:#64748b;font-weight:bold"><span id="qnum">1 / 5</span><span>문제당 20점 · 총 100점</span></div><h2 id="question" style="font-size:25px;line-height:1.5;margin-top:25px"></h2><div id="answers"></div><div class="feedback" id="feedback">답을 선택한 뒤 정답 확인을 눌러 보세요.</div><div class="control"><button class="primary" id="check" onclick="check()">정답 확인</button><button id="nextq" onclick="nextQ()" disabled>다음 문제 →</button></div></div>
+<div class="panel" id="result" hidden><div class="eyebrow">탐구 완료</div><div class="big" id="score">0점</div><h2>수고했어요!</h2><p id="resultText"></p><div id="review"></div><div class="control"><button class="primary" onclick="startQuiz()">다시 도전하기</button><button onclick="go(0)">처음 화면으로</button></div></div></section>
+
+<footer><span class="small" id="foot">삼각형의 무게중심 탐구</span><div class="nav"><button id="prev" onclick="go(cur-1)" disabled>← 이전</button><button class="primary" id="next" onclick="go(cur+1)">다음 →</button></div></footer>
+</main>
+<script>
+const initial={A:{x:360,y:55},B:{x:105,y:365},C:{x:615,y:365}};
+let P=JSON.parse(JSON.stringify(initial)),cur=0,drag=null,visible=[false,false,false];
+const questions=[
+{q:"삼각형의 중선에 대한 설명으로 옳은 것은?",a:["한 꼭짓점과 대변의 중점을 이은 선분","한 꼭짓점에서 대변에 수직으로 내린 선분","두 변의 길이를 같게 나누는 선분"],c:0,e:"중선은 삼각형의 한 꼭짓점과 그 대변의 중점을 이은 선분입니다."},
+{q:"삼각형 하나에는 중선이 모두 몇 개 있을까요?",a:["1개","2개","3개"],c:2,e:"세 꼭짓점에서 각각 반대편 변의 중점으로 중선을 그을 수 있으므로 모두 3개입니다."},
+{q:"삼각형의 무게중심은 무엇인가요?",a:["세 높이의 교점","세 중선의 교점","세 변의 길이의 합"],c:1,e:"삼각형의 세 중선은 한 점에서 만나며, 그 교점을 무게중심이라고 합니다."},
+{q:"무게중심 G가 중선 AD를 나누는 비율 AG : GD는?",a:["1 : 1","1 : 2","2 : 1"],c:2,e:"무게중심은 꼭짓점 쪽의 길이가 더 길도록 중선을 2:1로 나눕니다."},
+{q:"AG의 길이가 8cm일 때 GD의 길이는?",a:["2cm","4cm","16cm"],c:1,e:"AG : GD = 2 : 1이므로 GD는 AG의 절반입니다. 8 ÷ 2 = 4cm입니다."}
+];
+let qi=0,selected=-1,locked=false,answers=[];
+function mid(a,b){return{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
+function center(){return{x:(P.A.x+P.B.x+P.C.x)/3,y:(P.A.y+P.B.y+P.C.y)/3}}
+function points(){return{D:mid(P.B,P.C),E:mid(P.C,P.A),F:mid(P.A,P.B)}}
+function pt(p){return `${p.x},${p.y}`}
+function drawVertices(id){let g=document.getElementById(id);g.innerHTML='';for(let k of ['A','B','C']){let p=P[k];g.innerHTML+=`<circle class="handle" data-v="${k}" cx="${p.x}" cy="${p.y}" r="10" fill="white" stroke="#2457d6" stroke-width="4"/><text x="${p.x+13}" y="${p.y-13}" font-size="20" font-weight="bold" fill="#172554">${k}</text>`}}
+function render(){
+let d=points(),G=center(),verts=['A','B','C'];
+for(let n=1;n<=4;n++){let poly=document.getElementById('poly'+n);if(!poly)continue;poly.setAttribute('points',verts.map(k=>pt(P[k])).join(' '));}
+drawVertices('v1');
+for(let n of [2,3,4]){
+drawVertices('verts'+n);
+let lines=document.getElementById('lines'+n),mp=document.getElementById('points'+n);
+if(lines){lines.innerHTML='';let arr=[['A','D'],['B','E'],['C','F']];arr.forEach((pair,i)=>{if(n===2&&!visible[i])return;let a=P[pair[0]],b=d[pair[1]];lines.innerHTML+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${n===4&&i===0?'#f97316':'#0f766e'}" stroke-width="${n===4&&i===0?6:3}" stroke-dasharray="${n===2?'none':'none'}"/>`;});}
+if(mp){mp.innerHTML='';for(let k of ['D','E','F']){let p=d[k];mp.innerHTML+=`<circle cx="${p.x}" cy="${p.y}" r="6" fill="#f97316"/><text x="${p.x+9}" y="${p.y+18}" font-size="16" font-weight="bold" fill="#9a3412">${k}</text>`;}}
+let cg=document.getElementById('cent'+n);if(cg){cg.innerHTML=`<circle cx="${G.x}" cy="${G.y}" r="9" fill="#ef4444" stroke="white" stroke-width="3"/><text x="${G.x+12}" y="${G.y-12}" font-size="20" font-weight="bold" fill="#b91c1c">G</text>`;}
+}
+}
+function reset(){P=JSON.parse(JSON.stringify(initial));visible=[false,false,false];render()}
+function toggle(i){visible[i]=!visible[i];render()}
+function allLines(){visible=[true,true,true];render()}
+function go(n){if(n<0||n>5)return;cur=n;document.querySelectorAll('.screen').forEach((x,i)=>x.classList.toggle('on',i===n));document.querySelectorAll('.bar').forEach((x,i)=>x.classList.toggle('on',i<=n));document.getElementById('prev').disabled=n===0;document.getElementById('next').disabled=n===5;document.getElementById('next').textContent=n===4?'퀴즈 시작 →':'다음 →';if(n===3||n===4){visible=[true,true,true];render()}if(n===2){visible=[false,false,false];render()}}
+function fullScreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
+function pointerPos(e,svg){let r=svg.getBoundingClientRect();return{x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*440/r.height}}
+document.querySelectorAll('svg').forEach(svg=>{svg.addEventListener('pointerdown',e=>{let v=e.target.getAttribute('data-v');if(!v)return;drag=v;svg.setPointerCapture(e.pointerId)});svg.addEventListener('pointermove',e=>{if(!drag)return;let p=pointerPos(e,svg);p.x=Math.max(35,Math.min(685,p.x));p.y=Math.max(35,Math.min(405,p.y));let old=P[drag];P[drag]=p;let a=P.A,b=P.B,c=P.C,area=Math.abs((b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x));if(area<5000)P[drag]=old;render()});svg.addEventListener('pointerup',()=>drag=null);svg.addEventListener('pointercancel',()=>drag=null)});
+function startQuiz(){qi=0;selected=-1;locked=false;answers=[];document.getElementById('quiz').hidden=false;document.getElementById('result').hidden=true;showQ();go(5)}
+function showQ(){let q=questions[qi];selected=-1;locked=false;document.getElementById('qnum').textContent=`${qi+1} / 5`;document.getElementById('question').textContent=q.q;document.getElementById('answers').innerHTML=q.a.map((a,i)=>`<button class="choice" onclick="choose(${i})">${'①②③'[i]}　${a}</button>`).join('');document.getElementById('feedback').textContent='답을 선택한 뒤 정답 확인을 눌러 보세요.';document.getElementById('check').disabled=false;document.getElementById('nextq').disabled=true;document.getElementById('nextq').textContent=qi===4?'결과 보기':'다음 문제 →';document.getElementById('quiz').querySelector('#qnum').nextElementSibling.textContent='문제당 20점 · 총 100점';}
+function choose(i){if(locked)return;selected=i;document.querySelectorAll('.choice').forEach((b,j)=>b.classList.toggle('sel',j===i))}
+function check(){if(selected<0){document.getElementById('feedback').textContent='먼저 답을 하나 선택해 주세요.';return}let q=questions[qi],ok=selected===q.c;locked=true;answers.push({selected,ok});document.querySelectorAll('.choice').forEach((b,j)=>{if(j===q.c)b.classList.add('good');else if(j===selected)b.classList.add('bad')});document.getElementById('feedback').innerHTML=(ok?'정답입니다! ':'아쉽지만 정답은 '+['①','②','③'][q.c]+'입니다. ')+q.e;document.getElementById('check').disabled=true;document.getElementById('nextq').disabled=false}
+function nextQ(){if(qi<4){qi++;showQ()}else showResult()}
+function showResult(){document.getElementById('quiz').hidden=true;document.getElementById('result').hidden=false;let score=answers.filter(a=>a.ok).length*20;document.getElementById('score').textContent=score+'점';document.getElementById('resultText').textContent=`5문제 중 ${score/20}문제를 맞혔습니다. 이 점수는 현재 화면에서만 기록됩니다.`;document.getElementById('review').innerHTML=answers.map((a,i)=>`<div style="padding:9px 0;border-bottom:1px solid #dce4ef">문제 ${i+1} · ${a.ok?'정답':'오답'}</div>`).join('')}
+render();
+</script>
+</body></html>
